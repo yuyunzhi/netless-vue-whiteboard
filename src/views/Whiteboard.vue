@@ -13,6 +13,11 @@
             return {
                 netlessRoom: null,
                 recordData: null,
+                params:{
+                    identity:null,
+                    uuid:null,
+                    userId:null,
+                }
             }
         },
         methods: {
@@ -44,6 +49,23 @@
                 } else {
                     return null;
                 }
+            },
+            initParams () {
+               return new Promise (resolve => {
+                   this.params.identity = 'host'
+                   this.params.userId= `${Math.floor(Math.random() * 100000)}`;
+
+                   netlessWhiteboardApi.createRoomApi('test1', 0, 'historied').then(res=>{
+                       if (res.code === 200) {
+                           this.params.uuid = res.msg.room.uuid;
+                           resolve()
+                       }
+                   })
+               })
+
+
+
+                // this.$router.push(`/whiteboard/${identity}/${uuid}/${userId}/`)
             }
         },
         beforeMount(){
@@ -53,34 +75,36 @@
                 this.netlessRoom.release();
             }
         },
-        async mounted() {
-            const uuid = this.$route.params.uuid;
-            const identity = this.$route.params.identity;
-            const userId = this.$route.params.userId;
-            const roomToken = await this.getRoomToken(uuid);
-            if (uuid && roomToken) {
-                this.netlessRoom = WhiteFastSDK.Room("netless-whiteboard",{
-                    uuid: uuid,
-                    roomToken: roomToken,
-                    userId: userId,
-                    identity: identity,
-                    logoUrl: "https://white-sdk.oss-cn-beijing.aliyuncs.com/video/netless_black2.svg",
-                    rtc: {
-                        type: "agora",
-                        rtcObj: AgoraRTC,
-                        token: "8595fd46955f427db44b4e9ba90f015d",
-                    },
-                    replayCallback: () => {
-                        this.handleReplayUrl();
-                    },
-                    exitRoomCallback: () => {
-                        this.$router.push('/');
-                    },
-                    recordDataCallback: (data) => {
-                        this.recordData = data;
-                    },
-                });
-            }
+        mounted() {
+            this.initParams().then(async ()=>{
+                const { uuid,identity,userId} = this.params;
+                console.log('this.params;',this.params);
+                const roomToken = await this.getRoomToken(uuid);
+                if (uuid && roomToken) {
+                    this.netlessRoom = WhiteFastSDK.Room("netless-whiteboard",{
+                        uuid: uuid,
+                        roomToken: roomToken,
+                        userId: userId,
+                        identity: identity,
+                        logoUrl: "https://white-sdk.oss-cn-beijing.aliyuncs.com/video/netless_black2.svg",
+                        rtc: {
+                            type: "agora",
+                            rtcObj: AgoraRTC,
+                            token: "8595fd46955f427db44b4e9ba90f015d",
+                        },
+                        replayCallback: () => {
+                            this.handleReplayUrl();
+                        },
+                        exitRoomCallback: () => {
+                            this.$router.push('/');
+                        },
+                        recordDataCallback: (data) => {
+                            this.recordData = data;
+                        },
+                    });
+                }
+            })
+
         },
     }
 </script>

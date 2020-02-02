@@ -22,7 +22,7 @@ export default new Router({
       component: WhiteboardCreatorPage
     },
     {
-        path: '/whiteboard/:identity/:uuid/:userId/',
+        path: '/whiteboard', // :identity/:uuid/:userId/',
         name: 'Whiteboard',
         component: Whiteboard
     },
